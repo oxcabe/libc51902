@@ -1,3 +1,5 @@
+pub const MAX_OPCODE_LENGTH: usize = 6;
+
 #[derive(Debug)]
 enum JumpOpcode {
     Jmp,
@@ -26,22 +28,35 @@ enum OpcodeType {
 
 #[derive(Debug)]
 pub struct Opcode {
-    op_size: u8,
-    op: [u8; 6],
+    op_size: usize,
+    op: [u8; MAX_OPCODE_LENGTH],
     op_type: OpcodeType,
+}
+
+fn __build_opcode(partial_opcode: &[u8],
+                  partial_size: usize) -> [u8; MAX_OPCODE_LENGTH] {
+    let mut ret: [u8; 6] = [0; 6];
+    let ret_slice = &mut ret[..partial_size];
+
+    for (idx, val) in partial_opcode.iter().enumerate() {
+        ret_slice[idx] = *val;
+    }
+
+    ret
 }
 
 impl Opcode {
 
     fn new(op_type: OpcodeType) -> Opcode {
-        let op_size: u8;
-        let op: [u8; 6];
+        let op_size: usize;
+        let op: [u8; MAX_OPCODE_LENGTH];
         let type_borrow = &op_type;
 
         match type_borrow {
             OpcodeType::Nop => {
                 op_size = 6;
-                op = [0, 0, 0, 0, 0, 0];
+                let nop_opcode: [u8; 6] = [0; 6];
+                op = __build_opcode(&nop_opcode, op_size);
             },
             OpcodeType::Jump(jump_opcode) => {
                 op_size = 6;
@@ -93,7 +108,7 @@ impl Opcode {
 }
 
 lazy_static!{
-    pub static ref OPCODES: Vec<Opcode> = vec![
+    pub static ref OPCODES: [Opcode; 12] = [
         Opcode::new(OpcodeType::Nop),
         Opcode::new(OpcodeType::Jump(JumpOpcode::Jmp)),
         Opcode::new(OpcodeType::Jump(JumpOpcode::Jz)),
