@@ -1,4 +1,9 @@
+extern crate strum;
+
+use strum_macros::Display;
+
 /// Instruction opcode representation
+#[derive(Display)]
 pub enum Opcode {
     /// no-operation
     Nop,
@@ -25,6 +30,10 @@ pub enum Opcode {
 }
 
 impl Opcode {
+    pub fn op_str(&self) -> String {
+        self.to_string().to_lowercase()
+    }
+
     // [u8] deallocates in parent scope
     pub fn to_binary<'a>(&self) -> &'a[u8] {
         use Opcode::*;
